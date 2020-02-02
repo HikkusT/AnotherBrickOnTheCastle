@@ -6,18 +6,33 @@ public class Tijolo : MonoBehaviour
 {
     Vector3 direction;
     public float speed;
+    public float posX;
+    private float width;
     Vector3 velocity;
+    public bool success;
 
-    // Start is called before the first frame update
     void Start()
     {
-        this.transform.position = new Vector2(0, 0);
+        direction = Vector3.left;
+        width = GetComponent<SpriteRenderer>().sprite.rect.width * transform.localScale.x;
     }
-
     // Update is called once per frame
     void Update()
     {
-        direction = Vector3.right;
+        if (Input.GetKey(KeyCode.Space))
+        {
+            speed = 0;
+            if ((Mathf.Abs(transform.position.x - posX) / (width / 4)) < 0.25)
+            {
+                this.transform.position = new Vector3(posX, this.transform.position.y, this.transform.position.z);
+                success = true;
+            }
+            else
+            {
+                success = false;
+            }
+        }
+
         velocity = speed * direction.normalized;
         this.transform.position = this.transform.position + velocity * Time.deltaTime;
     }
@@ -26,4 +41,5 @@ public class Tijolo : MonoBehaviour
     {
         direction = -direction;
     }
+
 }
