@@ -89,6 +89,7 @@ public class MiniGameManager : MonoBehaviour
         mobileBrickInstance.transform.localScale = scale;
         mobileBrickInstance.GetComponent<Tijolo>().posX = holePos.x;
         mobileBrickInstance.GetComponent<Tijolo>().speed = speed;
+        mobileBrickInstance.GetComponent<Tijolo>().manager = this.GetComponent <MiniGameManager>();
         //}
     }
 

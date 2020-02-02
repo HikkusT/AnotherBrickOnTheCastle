@@ -13,6 +13,14 @@ public class Wall : MonoBehaviour
     private float brickWidth;
     private Queue<Vector2> holesPositions = new Queue<Vector2>();
     private Queue<Vector3> scales = new Queue<Vector3>();
+
+    private List<GameObject> tiles = new List<GameObject>();
+    private List<float> xPositions = new List<float>();
+    private List<float> multipliers = new List<float>();
+    private int rand;
+    private float xPosition;
+    private float multiplier;
+
     private float desiredBrickWidth;
     private float scaleMultiplier;
 
@@ -52,33 +60,46 @@ public class Wall : MonoBehaviour
 
     private void GenerateRow(float height)
     {
+
         float startPos = (-wallWidth / 2) / 100;
-        float currentLength = 0;
-        int chosenTile = Random.Range(0, numOfBricks);
+        float currentLength = Random.Range(-desiredBrickWidth, 0);
         
-        for (int i = 0; i < numOfBricks; i++)
+        while (currentLength < wallWidth)
         {
+            // Calcula o tamanho do tijolo
             float variation = Random.Range(-brickVariation, brickVariation);
             float currentBrickWidth = desiredBrickWidth * (1 + variation);
-
-            if (i == numOfBricks - 1)
-                currentBrickWidth = wallWidth - currentLength;
 
             currentLength += (currentBrickWidth / 2);
             float xPos = startPos + currentLength / 100;
             float scaleMultiplierX = currentBrickWidth / brickWidth;
-            if (i != chosenTile)
-            {
-                GameObject brickInstance = Instantiate(brick, new Vector2(xPos, height), Quaternion.identity);
 
-                brickInstance.transform.localScale = new Vector3(scaleMultiplierX, scaleMultiplier, 1);
-            }
-            else
+            GameObject brickInstance = Instantiate(brick, new Vector2(xPos, height), Quaternion.identity);
+            brickInstance.transform.localScale = new Vector3(scaleMultiplierX, scaleMultiplier, 1);
+
+            // Se ele nao é o primeiro nem o último, adiciona na fila para possível buraco
+            if ((currentLength - (currentBrickWidth / 2) > 0) && (currentLength + (currentBrickWidth / 2) < wallWidth))
             {
-                holesPositions.Enqueue(new Vector2(xPos, height));
-                scales.Enqueue(new Vector3(scaleMultiplierX, scaleMultiplier, 1));
+                tiles.Add(brickInstance);
+                xPositions.Add(xPos);
+                multipliers.Add(scaleMultiplierX);
             }
+
             currentLength += (currentBrickWidth / 2);
         }
+
+        rand = Random.Range(0, tiles.Count);
+        Debug.Log(tiles.Count);
+        brick = tiles[rand];
+        xPosition = xPositions[rand];
+        multiplier = multipliers[rand];
+        Destroy(brick);
+      
+        tiles.Clear();
+        xPositions.Clear();
+        multipliers.Clear();
+
+        holesPositions.Enqueue(new Vector2(xPosition, height));
+        scales.Enqueue(new Vector3(multiplier, scaleMultiplier, 1));
     }
 }
