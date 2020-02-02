@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class Wall : MonoBehaviour
 {
+    public MiniGameManager manager;
     public float wallWidth;
     public int numOfBricks;
     public GameObject brick;
@@ -20,6 +21,7 @@ public class Wall : MonoBehaviour
     {
         brickWidth = brick.GetComponent<SpriteRenderer>().sprite.rect.width;
         GenerateWall();
+        manager.NextRow();
     }
 
     // Update is called once per frame
@@ -28,7 +30,15 @@ public class Wall : MonoBehaviour
         
     }
 
+    public Vector2 GetHolePos()
+    {
+        return holesPositions.Dequeue();
+    }
 
+    public Vector3 GetScale()
+    {
+        return scales.Dequeue();
+    }
 
     private void GenerateWall()
     {

@@ -26,12 +26,10 @@ public class Tijolo : MonoBehaviour
             {
                 this.transform.position = new Vector3(posX, this.transform.position.y, this.transform.position.z);
                 success = true;
-                ManageMiniGame.nextRow();
             }
             else
             {
                 success = false;
-                ManageMiniGame.EndGame();
             }
         }
 
