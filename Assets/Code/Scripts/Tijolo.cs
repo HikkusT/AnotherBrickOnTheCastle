@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class Tijolo : MonoBehaviour
 {
+    public MiniGameManager manager;
     Vector3 direction;
     public float speed;
     public float posX;
@@ -26,10 +27,12 @@ public class Tijolo : MonoBehaviour
             {
                 this.transform.position = new Vector3(posX, this.transform.position.y, this.transform.position.z);
                 success = true;
+                manager.NextRow();
             }
             else
             {
                 success = false;
+                manager.EndGame();
             }
         }
 
