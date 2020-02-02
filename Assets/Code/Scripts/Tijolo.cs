@@ -22,14 +22,16 @@ public class Tijolo : MonoBehaviour
         if (Input.GetKey(KeyCode.Space))
         {
             speed = 0;
-            if ((Mathf.Abs(transform.position.x - posX) / (width / 4)) < 0.25)
+            if ((Mathf.Abs(transform.position.x - posX) < (width / 400)))
             {
                 this.transform.position = new Vector3(posX, this.transform.position.y, this.transform.position.z);
                 success = true;
+                ManageMiniGame.nextRow();
             }
             else
             {
                 success = false;
+                ManageMiniGame.EndGame();
             }
         }
 
