@@ -1205,7 +1205,7 @@ MonoBehaviour:
   mobileBrickPrefab: {fileID: 961501599916661366, guid: 7638cea0ea903a54db4e4ba543b6d887,
     type: 3}
   wall: {fileID: 2129293570}
-  initialLives: 2
+  initialLives: 3
   initialSpeed: 1.5
   gameOverCanvas: {fileID: 595662662}
   infos: {fileID: 1871863316}

@@ -19,4 +19,9 @@ public class ButtonController : MonoBehaviour
     {
         SceneManager.LoadScene("MainMenu");
     }
+
+    public void LoadCutScene()
+    {
+        SceneManager.LoadScene("SampleScene");
+    }
 }
