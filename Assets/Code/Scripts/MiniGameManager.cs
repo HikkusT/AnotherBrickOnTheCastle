@@ -1,96 +1,82 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class MiniGameManager : MonoBehaviour
 {
     public GameObject mobileBrickPrefab;
     public Wall wall;
+    public int initialLives;
+    public float initialSpeed;
+    public GameObject gameOverCanvas;
+    public Text infos;
+    public Fader fader;
+    public float animationPersistence;
+    public Sprite[] spritesheet;
+    public SpriteRenderer mestreDeObras;
+
+    [HideInInspector]
+    public int highScore = 0;
+    [HideInInspector]
+    public int lives;
 
     private float speed = 1;
-    //private static float healing = 1;
-    //public static float nextHeight;
-    //public static GameObject CastleManager;
     private GameObject mobileBrickInstance;
 
-    //private  getHeight(GameObject Wall) {
-    //    nextHeight = Wall.nextheight();
-    //}
+    void Start()
+    {
+        StartLevel();
+    }
 
-    //private float getMaxHealth(GameObject CastleManager) {
-    //    return CastleManager.maxHealth;
-    //}
+    void StartLevel()
+    {
+        gameOverCanvas.SetActive(false);
+        lives = initialLives;
+        speed = initialSpeed;
+        wall.StartGeneration();
+    }
 
-    //private float getHealth(GameObject CastleManger) {
-    //    return CastleManger.health;
-    //}
+    void DestroyLevel()
+    {
+        wall.DestroyWall();
+        Destroy(mobileBrickInstance);
+    }
 
-    //public float getSpeed() {
-    //    return speed;
-    //}
+    public void RestartLevel()
+    {
+        StartCoroutine(fader.FadeOut(0.3f));
+        DestroyLevel();
+        StartLevel();
+    }
 
-    //public float getHealing() {
-    //    return healing;
-    //}
+    private void Update()
+    {
+        infos.text = "Lives: " + lives + "\nScore: " + highScore;
+    }
 
-    //private void setHealing() {
-    //    healing = healing + healing*1.5;
-    //}
-
-    //private void setSpeed() {
-    //    speed = 1.1 * speed;
-    //}
-
-    // Start is called before the first frame update
-    //void Start()
-    //{
-
-    //    speed = 1;
-    //    healing = 1;
-    //    this.nextHeight = getHeight();
-    //    GameObject MobileBrickInstance = Instantiate(MobileBrick, new Vector3(0, this.nextHeight, 0), Quaternion.identity);
-    //}
-
-    // Update is called once per frame
-    //void Update()
-    //{
-    //    if(MobileBrickInstance.sucess ==  True) {
-    //        setHealing();
-    //        Destroy(MobileBrickInstance);
-    //        if(getHealth(CastleManager) + getHealing() >= getMaxHealth(CastleManager)){
-    //           getHealth(CastleManager) = getMaxHealth(CastleManager);
-    //        } else {
-    //            getHealth(CastleManager) = getHealing() + getHealth(CastleManager);
-    //            setSpeed();
-    //            getHeight(Wall);
-    //            GameObject MobileBrickInstance = Instantiate(MobileBrick, new Vector3(0, this.nextHeight, 0), Quaternion.identity);
-    //        }
-    //    } else {
-    //        Destroy(MobileBrickInstance);
-    //        Debug.Log("DEU RUIM");
-    //    }
-    //}
-
-    public IEnumerator NextRow()
+    private IEnumerator NextRow()
     {
         if (mobileBrickInstance != null)
         {
-            //mobileBrickInstance.transform.SetParent(wall.transform);
+            mobileBrickInstance.transform.SetParent(wall.transform);
             Destroy(mobileBrickInstance.GetComponent<Tijolo>());
         }
         yield return StartCoroutine(wall.AnimateNextRow());
         Debug.Log("FFFF");
 
         CreateLari();
+        yield return null;
     }
 
     public void CreateLari()
     {
         speed = 1.1f * speed;
         Vector2 holePos = wall.GetHolePos();
+        float height = wall.baseHeight;
         Vector3 scale = wall.GetScale();
 
-        mobileBrickInstance = Instantiate(mobileBrickPrefab, new Vector3(0, holePos.y, 0), Quaternion.identity);
+        mobileBrickInstance = Instantiate(mobileBrickPrefab, new Vector3(0, height, 0), Quaternion.identity);
         mobileBrickInstance.transform.localScale = scale;
         mobileBrickInstance.GetComponent<Tijolo>().posX = holePos.x;
         mobileBrickInstance.GetComponent<Tijolo>().speed = speed;
@@ -98,8 +84,45 @@ public class MiniGameManager : MonoBehaviour
         mobileBrickInstance.GetComponent<BoxCollider2D>().size = mobileBrickInstance.GetComponent<SpriteRenderer>().sprite.bounds.size;
     }
 
-    public void EndGame()
+    public void ApplyFail()
     {
-        Debug.Log("ACABOU");
+        StartCoroutine(mestreDeObrasFail());
+        StartCoroutine(Camera.main.GetComponent<CameraEffect>().ShakeScreen(0.2f));
+        lives--;
+        if (lives > 0)
+            StartCoroutine(NextRow());
+        else
+            StartCoroutine(EndGame());
+    }
+
+    public void ApplySuccess()
+    {
+        StartCoroutine(mestreDeObrasSuccess());
+        highScore++;
+        StartCoroutine(NextRow());
+    }
+
+    private IEnumerator EndGame()
+    {
+        yield return fader.FadeIn(0.3f);
+        gameOverCanvas.SetActive(true);
+    }
+
+    private IEnumerator mestreDeObrasFail()
+    {
+        mestreDeObras.sprite = spritesheet[1];
+
+        yield return new WaitForSeconds(animationPersistence);
+
+        mestreDeObras.sprite = spritesheet[0];
+    }
+
+    private IEnumerator mestreDeObrasSuccess()
+    {
+        mestreDeObras.sprite = spritesheet[2];
+
+        yield return new WaitForSeconds(animationPersistence);
+
+        mestreDeObras.sprite = spritesheet[0];
     }
 }

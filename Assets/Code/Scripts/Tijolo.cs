@@ -10,7 +10,7 @@ public class Tijolo : MonoBehaviour
     public float posX;
     private float width;
     Vector3 velocity;
-    public bool success;
+    bool foi = false;
 
     void Start()
     {
@@ -20,19 +20,18 @@ public class Tijolo : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKey(KeyCode.Space))
+        if (Input.GetKeyDown(KeyCode.Space) && !foi)
         {
             speed = 0;
-            if ((Mathf.Abs(transform.position.x - posX) < (width / 400)))
+            if ((Mathf.Abs(transform.position.x - posX) < (width / 1000)))
             {
+                foi = true;
                 this.transform.position = new Vector3(posX, this.transform.position.y, this.transform.position.z);
-                success = true;
-                manager.NextRow();
+                manager.ApplySuccess();
             }
             else
             {
-                success = false;
-                manager.EndGame();
+                manager.ApplyFail();
             }
         }
 

@@ -9,7 +9,7 @@ public abstract class Draggable : MonoBehaviour, IBeginDragHandler, IDragHandler
 
     public void OnBeginDrag(PointerEventData eventData)
     {
-        savePos = transform.position;
+        //savePos = transform.position;
     }
 
     public void OnDrag(PointerEventData eventData) 
@@ -19,6 +19,6 @@ public abstract class Draggable : MonoBehaviour, IBeginDragHandler, IDragHandler
 
     public void OnEndDrag(PointerEventData eventData)
     {
-        transform.position = savePos;
+        //transform.position = savePos;
     }
 }

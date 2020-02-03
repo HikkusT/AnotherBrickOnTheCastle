@@ -9,22 +9,45 @@ public class Wall : MonoBehaviour
     public int numOfBricks;
     public GameObject brick;
     public float brickVariation;
+    public int wallHeight;
+
+    public float baseHeight;
 
     private float brickWidth;
     private float brickHeight;
     private Queue<Vector2> holesPositions = new Queue<Vector2>();
     private Queue<Vector3> scales = new Queue<Vector3>();
+
+    private List<GameObject> tiles = new List<GameObject>();
+    private List<float> xPositions = new List<float>();
+    private List<float> multipliers = new List<float>();
+    private int rand;
+    private float xPosition;
+    private float multiplier;
+
     private float desiredBrickWidth;
     private float scaleMultiplier;
 
-    // Start is called before the first frame update
-    void Start()
+    private float lastHeight;
+
+    public void StartGeneration()
     {
+        holesPositions.Clear();
+        scales.Clear();
+        tiles.Clear();
+        xPositions.Clear();
+        multipliers.Clear();
         transform.position = Vector3.zero;
 
         brickWidth = brick.GetComponent<SpriteRenderer>().sprite.rect.width;
         GenerateWall();
         manager.CreateLari();
+    }
+
+    public void DestroyWall()
+    {
+        foreach (Transform child in transform)
+            Destroy(child.gameObject);
     }
 
     // Update is called once per frame
@@ -49,41 +72,58 @@ public class Wall : MonoBehaviour
         scaleMultiplier = desiredBrickWidth / brickWidth;
         brickHeight = scaleMultiplier * brick.GetComponent<SpriteRenderer>().sprite.rect.height;
 
-        for (int i = 0; i < 200 * Camera.main.orthographicSize / brickHeight; i++)
-            GenerateRow((i * brickHeight + brickHeight / 2) / 100 - Camera.main.orthographicSize);
+        baseHeight = (brickHeight / 2) / 100 - Camera.main.orthographicSize;
+        //for (int i = 0; i < 200 * Camera.main.orthographicSize / brickHeight; i++)
+        for (int i =0; i <= wallHeight; i ++)
+            GenerateRow((i * brickHeight) / 100 + baseHeight);
+
+        lastHeight = (wallHeight * brickHeight) / 100 + baseHeight;
     }
 
     private void GenerateRow(float height)
     {
+        Debug.Log("AQUI1");
         float startPos = (-wallWidth / 2) / 100;
-        float currentLength = 0;
-        int chosenTile = Random.Range(0, numOfBricks);
+        float currentLength = Random.Range(-desiredBrickWidth, 0);
         
-        for (int i = 0; i < numOfBricks; i++)
+        while (currentLength < wallWidth)
         {
+            // Calcula o tamanho do tijolo
             float variation = Random.Range(-brickVariation, brickVariation);
             float currentBrickWidth = desiredBrickWidth * (1 + variation);
-
-            if (i == numOfBricks - 1)
-                currentBrickWidth = wallWidth - currentLength;
 
             currentLength += (currentBrickWidth / 2);
             float xPos = startPos + currentLength / 100;
             float scaleMultiplierX = currentBrickWidth / brickWidth;
-            if (i != chosenTile)
-            {
-                GameObject brickInstance = Instantiate(brick, new Vector3(xPos, height, 10), Quaternion.identity);
-                brickInstance.transform.SetParent(transform);
 
-                brickInstance.transform.localScale = new Vector3(scaleMultiplierX, scaleMultiplier, 1);
-            }
-            else
+            GameObject brickInstance = Instantiate(brick, new Vector3(xPos, height, 10), Quaternion.identity);
+            brickInstance.transform.localScale = new Vector3(scaleMultiplierX, scaleMultiplier, 1);
+            brickInstance.transform.SetParent(transform);
+
+            // Se ele nao é o primeiro nem o último, adiciona na fila para possível buraco
+            if ((currentLength - (currentBrickWidth / 2) > 0) && (currentLength + (currentBrickWidth / 2) < wallWidth))
             {
-                holesPositions.Enqueue(new Vector2(xPos, height));
-                scales.Enqueue(new Vector3(scaleMultiplierX, scaleMultiplier, 1));
+                tiles.Add(brickInstance);
+                xPositions.Add(xPos);
+                multipliers.Add(scaleMultiplierX);
             }
+
             currentLength += (currentBrickWidth / 2);
         }
+
+        rand = Random.Range(0, tiles.Count);
+        Debug.Log(tiles.Count);
+        GameObject brickToDestroy = tiles[rand];
+        xPosition = xPositions[rand];
+        multiplier = multipliers[rand];
+        Destroy(brickToDestroy);
+      
+        tiles.Clear();
+        xPositions.Clear();
+        multipliers.Clear();
+
+        holesPositions.Enqueue(new Vector2(xPosition, height));
+        scales.Enqueue(new Vector3(multiplier, scaleMultiplier, 1));
     }
 
     public float EaseInBack(float start, float end, float value)
@@ -129,7 +169,13 @@ public class Wall : MonoBehaviour
             elapsedTime += Time.deltaTime;
             yield return null;
         }
-        Debug.Log("EEE");
+
+        GenerateRow(lastHeight);
         yield break;
+    }
+
+    void GenerateLaterals()
+    {
+
     }
 }
